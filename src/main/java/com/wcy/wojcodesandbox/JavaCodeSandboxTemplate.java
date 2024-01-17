@@ -17,7 +17,7 @@ import java.util.List;
  * @date 2024/1/16 11:15
  */
 @Slf4j
-public class JavaCodeSandboxTemplate implements CodeSandbox {
+public abstract class JavaCodeSandboxTemplate implements CodeSandbox {
 
     private static final String GLOBAL_CODE_DIR_NAME = "tmpCode";
     private static final String GLOBAL_JAVA_CLASS_NAME = "Main.java";
@@ -73,7 +73,7 @@ public class JavaCodeSandboxTemplate implements CodeSandbox {
     /**
      * 保存代码到文件
      */
-    private File saveCodeToFile(String code) {
+    public File saveCodeToFile(String code) {
         // 获取当前工作目录
         String userDir = System.getProperty("user.dir");
         // 全局代码目录
@@ -94,7 +94,7 @@ public class JavaCodeSandboxTemplate implements CodeSandbox {
     /**
      * 编译代码
      */
-    private ExecuteMessage compileCode(File userCodeFile) {
+    public ExecuteMessage compileCode(File userCodeFile) {
         String compileOrder = String.format(GLOBAL_JAVA_COMPILE_ORDER, userCodeFile.getAbsolutePath());
         Runtime runtime = Runtime.getRuntime();
         try {
@@ -109,7 +109,7 @@ public class JavaCodeSandboxTemplate implements CodeSandbox {
     /**
      * 执行代码
      */
-    private List<ExecuteMessage> runCode(File userCodeFile, List<String> inputList) {
+    public List<ExecuteMessage> runCode(File userCodeFile, List<String> inputList) {
         String userCodeParentPath = userCodeFile.getParentFile().getAbsolutePath();
         List<ExecuteMessage> executeMessages = new ArrayList<>();
         try {
@@ -138,11 +138,12 @@ public class JavaCodeSandboxTemplate implements CodeSandbox {
     /**
      * 整理执行结果
      */
-    private ExecuteCodeResponse getExecuteCodeResponse(List<ExecuteMessage> executeMessageList) {
+    public ExecuteCodeResponse getExecuteCodeResponse(List<ExecuteMessage> executeMessageList) {
         ExecuteCodeResponse executeCodeResponse = new ExecuteCodeResponse();
         List<String> outputList = new ArrayList<>();
         // 取最大时间
         long maxTime = 0;
+        long maxMemory = 0;
         for (ExecuteMessage executeMessage : executeMessageList) {
             String errorMessage = executeMessage.getErrorMessage();
             if (StrUtil.isNotBlank(errorMessage)) {
@@ -153,8 +154,12 @@ public class JavaCodeSandboxTemplate implements CodeSandbox {
             }
             outputList.add(executeMessage.getMessage());
             Long time = executeMessage.getTime();
+            Long memory = executeMessage.getMemory();
             if (time != null) {
                 maxTime = Math.max(maxTime, time);
+            }
+            if (memory != null) {
+                maxMemory = Math.max(maxMemory, memory);
             }
         }
         // 正常运行结束
@@ -164,6 +169,7 @@ public class JavaCodeSandboxTemplate implements CodeSandbox {
         executeCodeResponse.setOutputList(outputList);
         JudgeInfo judgeInfo = new JudgeInfo();
         judgeInfo.setTime(maxTime);
+        judgeInfo.setMemory(maxMemory);
         executeCodeResponse.setJudgeInfo(judgeInfo);
         return executeCodeResponse;
     }
@@ -171,7 +177,7 @@ public class JavaCodeSandboxTemplate implements CodeSandbox {
     /**
      * 文件清理
      */
-    private boolean cleanFile(File userCodeFile) {
+    public boolean cleanFile(File userCodeFile) {
         if (userCodeFile.getParentFile() != null) {
             String userCodeParentPath = userCodeFile.getParentFile().getAbsolutePath();
             boolean del = FileUtil.del(userCodeParentPath);

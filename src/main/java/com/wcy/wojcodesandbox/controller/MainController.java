@@ -1,4 +1,5 @@
 package com.wcy.wojcodesandbox.controller;
+import com.wcy.wojcodesandbox.JavaDockerCodeSandBox;
 import com.wcy.wojcodesandbox.JavaNativeCodeSandbox;
 import com.wcy.wojcodesandbox.model.ExecuteCodeRequest;
 import com.wcy.wojcodesandbox.model.ExecuteCodeResponse;
@@ -20,6 +21,10 @@ public class MainController {
 
     @Resource
     private JavaNativeCodeSandbox javaNativeCodeSandbox;
+    @Resource
+    private JavaDockerCodeSandBox javaDockerCodeSandBox;
+
+
 
     /**
      * 执行代码
@@ -28,7 +33,7 @@ public class MainController {
      * @return
      */
     @PostMapping("/executeCode")
-    ExecuteCodeResponse executeCode(@RequestBody ExecuteCodeRequest executeCodeRequest, HttpServletRequest request,
+   public ExecuteCodeResponse executeCode(@RequestBody ExecuteCodeRequest executeCodeRequest, HttpServletRequest request,
                                     HttpServletResponse response) {
         // 基本的认证
         String authHeader = request.getHeader(AUTH_REQUEST_HEADER);
@@ -41,4 +46,26 @@ public class MainController {
         }
         return javaNativeCodeSandbox.executeCode(executeCodeRequest);
     }
+
+    /**
+     * docker 执行代码
+     *
+     * @param executeCodeRequest
+     * @return
+     */
+    @PostMapping("/executeCode/docker")
+  public   ExecuteCodeResponse dockerExecuteCode(@RequestBody ExecuteCodeRequest executeCodeRequest, HttpServletRequest request,
+                                    HttpServletResponse response) {
+        // 基本的认证
+        String authHeader = request.getHeader(AUTH_REQUEST_HEADER);
+        if (!AUTH_REQUEST_SECRET.equals(authHeader)) {
+            response.setStatus(403);
+            return null;
+        }
+        if (executeCodeRequest == null) {
+            throw new RuntimeException("请求参数为空");
+        }
+        return javaDockerCodeSandBox.executeCode(executeCodeRequest);
+    }
+
 }
