@@ -1,8 +1,10 @@
 package com.wcy.wojcodesandbox.controller;
+import cn.hutool.crypto.digest.MD5;
 import com.wcy.wojcodesandbox.JavaDockerCodeSandBox;
 import com.wcy.wojcodesandbox.JavaNativeCodeSandbox;
 import com.wcy.wojcodesandbox.model.ExecuteCodeRequest;
 import com.wcy.wojcodesandbox.model.ExecuteCodeResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,15 +17,18 @@ import javax.servlet.http.HttpServletResponse;
 public class MainController {
 
     // 定义鉴权请求头和密钥
-    private static final String AUTH_REQUEST_HEADER = "auth";
+    @Value("${auth.request.header}")
+    private  String AUTH_REQUEST_HEADER;
 
-    private static final String AUTH_REQUEST_SECRET = "secretKey";
+    @Value("${auth.request.secret}")
+    private static String secretKey;
+
+    private static final String AUTH_REQUEST_SECRET = MD5.create().digestHex(secretKey);
 
     @Resource
     private JavaNativeCodeSandbox javaNativeCodeSandbox;
     @Resource
     private JavaDockerCodeSandBox javaDockerCodeSandBox;
-
 
 
     /**
