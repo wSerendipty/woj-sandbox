@@ -26,7 +26,7 @@ public abstract class JavaCodeSandboxTemplate implements CodeSandbox {
 
     private static final String GLOBAL_JAVA_RUN_ORDER = "java -Xmx256m -Dfile.encoding=UTF-8 -cp %s Main %s";
 
-    private static final long TIME_OUT = 5000L;
+    private static final long TIME_OUT = 3000L;
 
     private static final String COMPILE = "编译";
     private static final String RUN = "运行";
@@ -35,9 +35,6 @@ public abstract class JavaCodeSandboxTemplate implements CodeSandbox {
     public ExecuteCodeResponse executeCode(ExecuteCodeRequest executeCodeRequest) {
         List<String> inputList = executeCodeRequest.getInputList();
         String code = executeCodeRequest.getCode();
-        // todo 根据语言选择编译命令
-        String language = executeCodeRequest.getLanguage();
-
         // 1. 保存代码到文件
         File userCodeFile = saveCodeToFile(code);
         // 2. 编译代码
@@ -80,7 +77,10 @@ public abstract class JavaCodeSandboxTemplate implements CodeSandbox {
         String globalCodePathName = userDir + File.separator + GLOBAL_CODE_DIR_NAME;
         // 判断全局代码目录是否存在，没有则新建
         if (!FileUtil.exist(globalCodePathName)) {
-            FileUtil.mkdir(globalCodePathName);
+            File mkdir = FileUtil.mkdir(globalCodePathName);
+            if (!mkdir.exists()) {
+                throw new RuntimeException("创建全局代码目录失败");
+            }
         }
         // 利用UUID生成文件目录
         String userCodeParentPathName = globalCodePathName + File.separator + UUID.randomUUID();
@@ -114,6 +114,8 @@ public abstract class JavaCodeSandboxTemplate implements CodeSandbox {
         List<ExecuteMessage> executeMessages = new ArrayList<>();
         try {
             for (String inputArgs : inputList) {
+                inputArgs = inputArgs.replace("\n", " ");
+                System.out.println(inputArgs);
                 String runOrder = String.format(GLOBAL_JAVA_RUN_ORDER, userCodeParentPath, inputArgs);
                 Runtime runtime = Runtime.getRuntime();
                 Process runProcess = runtime.exec(runOrder);
@@ -168,7 +170,7 @@ public abstract class JavaCodeSandboxTemplate implements CodeSandbox {
         }
         executeCodeResponse.setOutputList(outputList);
         JudgeInfo judgeInfo = new JudgeInfo();
-        judgeInfo.setTime(maxTime);
+        judgeInfo.setTime(maxTime - 300 > 0 ? maxTime - 300 : 0);
         judgeInfo.setMemory(maxMemory);
         executeCodeResponse.setJudgeInfo(judgeInfo);
         return executeCodeResponse;

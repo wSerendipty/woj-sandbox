@@ -1,11 +1,10 @@
 package com.wcy.wojcodesandbox.docker;
 
 import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.command.CreateContainerCmd;
-import com.github.dockerjava.api.command.CreateContainerResponse;
-import com.github.dockerjava.api.command.ListContainersCmd;
+import com.github.dockerjava.api.command.*;
 import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.Frame;
+import com.github.dockerjava.api.model.PullResponseItem;
 import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.command.LogContainerResultCallback;
 
@@ -18,7 +17,7 @@ public class DockerDemo {
         DockerClient dockerClient = DockerClientBuilder.getInstance().build();
 //        PingCmd pingCmd = dockerClient.pingCmd();
 //        pingCmd.exec();
-        // 拉取镜像
+//        // 拉取镜像
         String image = "nginx:latest";
 //        PullImageCmd pullImageCmd = dockerClient.pullImageCmd(image);
 //        PullImageResultCallback pullImageResultCallback = new PullImageResultCallback() {

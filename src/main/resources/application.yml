@@ -1,7 +1,6 @@
 server:
   port: 8181
 
-auth:
-  request:
-    header: Authorization
-    secret: Wcy0626..
+spring:
+  application:
+    name: woj-codesandbox
